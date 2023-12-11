@@ -7,6 +7,21 @@ import logging
 
 log = logging.getLogger(__name__)
 
+
+def is_power_of_2(n):
+    if n <= 0:
+        return False
+    return (n & (n - 1)) == 0
+
+
+def floor_power_of_2(n):
+    power = 1
+    while n > 1:
+        n >>= 1
+        power <<= 1
+    return power
+
+
 class TerminalUI:
     def __init__(self, mode, echo=False):
         '''
@@ -19,6 +34,7 @@ class TerminalUI:
             logging.info("running in AVL mode")
             self._tree = avl.AVL()
         self._echo = echo
+        self.SPACING_CONST = 16
 
     def run(self):
         '''
@@ -148,7 +164,7 @@ class TerminalUI:
         Returns a list of symbols that the menu defined as valid hotkeys.
         '''
         opts = self.menu_options()
-        return [ o.split(":")[0] for o in opts if len(o.split(":")[0]) == 1 ]
+        return [o.split(":")[0] for o in opts if len(o.split(":")[0]) == 1]
 
     def get_choice(self):
         '''
@@ -181,9 +197,15 @@ class TerminalUI:
     def show_2d(self):
         '''
         Shows a pretty 2D tree based on the output of bfs_order_star(). None
-        values are are replaced by stars ("*").
+        values are replaced by stars ("*").
         '''
-        log.info("TODO@src/ui.py: implement show_2d() using bfs_order_star()")
+        self.SPACING_CONST = 16 << (self._tree.height() - 4) if self._tree.height() > 4 else 16
+        print(*[(((self.SPACING_CONST // floor_power_of_2(i + 1)) - (len(str(el)) if el is not None else 1)) * " ") +
+                (str(el) if el is not None else "*") +
+                ((self.SPACING_CONST // floor_power_of_2(i + 1)) * " ") +
+                ("\n" if is_power_of_2(i + 2) else "")
+                for i, el in enumerate(self._tree.bfs_order_star())], sep='')
+
 
 if __name__ == "__main__":
     log.critical("ui contains no main module")

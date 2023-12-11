@@ -21,46 +21,66 @@ class AVL(bst.BST):
         Example which shows how to override and call parent methods.  You
         may remove this function and overide something else if you'd like.
         '''
-        log.debug("calling bst.BST.add() explicitly from child")
-        # TODO: apply balance() correctly for add/delete
-        return super().add(v)
+        return super().add(v).balance()
+
+    def delete(self, v):
+        return super().delete(v).balance()
 
     def balance(self):
         '''
         AVL-balances around the node rooted at `self`.  In other words, this
         method applies one of the following if necessary: slr, srr, dlr, drr.
         '''
-        log.info("TODO@src/avl.py: implement balance()")
-        self.slr().srr().dlr().drr() # TODO: apply these methods correctly
-        return self
+        if self.is_empty():
+            return self
+        height_dif = self.get_lc().height() - self.get_rc().height()
+        if height_dif >= 2:
+            if self.get_lc().get_rc().is_empty():
+                new_root = self.srr()
+            else:
+                new_root = self.dlr()
+        elif height_dif <= -2:
+            if self.get_rc().get_lc().is_empty():
+                new_root = self.slr()
+            else:
+                new_root = self.drr()
+        else:
+            new_root = self
+        return new_root.cons(new_root.get_lc().balance(), new_root.get_rc().balance())
 
     def slr(self):
         '''
         Performs a single-left rotate around the node rooted at `self`.
         '''
-        log.info("TODO@src/avl.py: implement slr()")
-        return self
+        new_root = self.get_rc()
+        new_root.set_lc(self)
+        self.set_rc(AVL())
+        return new_root
 
     def srr(self):
         '''
         Performs a single-right rotate around the node rooted at `self`.
         '''
-        log.info("TODO@src/avl.py: implement srr()")
-        return self
+        new_root = self.get_lc()
+        new_root.set_rc(self)
+        self.set_lc(AVL())
+        return new_root
 
     def dlr(self):
         '''
         Performs a double-left rotate around the node rooted at `self`.
         '''
-        log.info("TODO@src/avl.py: implement drl()")
-        return self
+        new_root = self.get_lc().slr()
+        self.set_lc(new_root)
+        return self.srr()
 
     def drr(self):
         '''
         Performs a double-right rotate around the node rooted at `self`.
         '''
-        log.info("TODO@src/avl.py: implement drr()")
-        return self
+        new_root = self.get_rc().srr()
+        self.set_rc(new_root)
+        return self.slr()
 
 if __name__ == "__main__":
     log.critical("module contains no main module")
