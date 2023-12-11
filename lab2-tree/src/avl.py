@@ -26,35 +26,28 @@ class AVL(bst.BST):
     def delete(self, v):
         return super().delete(v).balance()
 
+    def get_diff(self):
+        return 0 if self.is_empty() else self.get_lc().height() - self.get_rc().height()
+
     def balance(self):
         '''
         AVL-balances around the node rooted at `self`.  In other words, this
         method applies one of the following if necessary: slr, srr, dlr, drr.
         '''
-        if self.is_empty():
-            return self
-        height_dif = self.get_lc().height() - self.get_rc().height()
-        if height_dif >= 2:
-            if self.get_lc().get_rc().is_empty():
-                new_root = self.srr()
-            else:
-                new_root = self.dlr()
-        elif height_dif <= -2:
-            if self.get_rc().get_lc().is_empty():
-                new_root = self.slr()
-            else:
-                new_root = self.drr()
-        else:
-            new_root = self
-        return new_root.cons(new_root.get_lc().balance(), new_root.get_rc().balance())
+        root = (self.drr() if self.get_diff() == 2 and self.get_lc().get_diff() == -1 else
+                self.srr() if self.get_diff() == 2 else
+                self.dlr() if self.get_diff() == -2 and self.get_rc().get_diff() == 1 else
+                self.slr() if self.get_diff() == -2 else
+                self)
+        return root.cons(root.get_lc().balance(), root.get_rc().balance()) if not root.is_empty() else root
 
     def slr(self):
         '''
         Performs a single-left rotate around the node rooted at `self`.
         '''
         new_root = self.get_rc()
+        self.set_rc(new_root.get_lc())
         new_root.set_lc(self)
-        self.set_rc(AVL())
         return new_root
 
     def srr(self):
@@ -62,24 +55,22 @@ class AVL(bst.BST):
         Performs a single-right rotate around the node rooted at `self`.
         '''
         new_root = self.get_lc()
+        self.set_lc(new_root.get_rc())
         new_root.set_rc(self)
-        self.set_lc(AVL())
         return new_root
-
-    def dlr(self):
-        '''
-        Performs a double-left rotate around the node rooted at `self`.
-        '''
-        new_root = self.get_lc().slr()
-        self.set_lc(new_root)
-        return self.srr()
 
     def drr(self):
         '''
+        Performs a double-left rotate around the node rooted at `self`.
+        '''
+        self.set_lc(self.get_lc().slr())
+        return self.srr()
+
+    def dlr(self):
+        '''
         Performs a double-right rotate around the node rooted at `self`.
         '''
-        new_root = self.get_rc().srr()
-        self.set_rc(new_root)
+        self.set_rc(self.get_rc().srr())
         return self.slr()
 
 if __name__ == "__main__":

@@ -199,7 +199,7 @@ class TerminalUI:
         Shows a pretty 2D tree based on the output of bfs_order_star(). None
         values are replaced by stars ("*").
         '''
-        self.SPACING_CONST = 16 << (self._tree.height() - 4) if self._tree.height() > 4 else 16
+        self.SPACING_CONST = 16 << (self._tree.height() - 3) if self._tree.height() > 3 else 16
         print(*[(((self.SPACING_CONST // floor_power_of_2(i + 1)) - (len(str(el)) if el is not None else 1)) * " ") +
                 (str(el) if el is not None else "*") +
                 ((self.SPACING_CONST // floor_power_of_2(i + 1)) * " ") +
